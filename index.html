@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>PolySpace Warfare - Low Poly Shooter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Game Canvas will be appended here by Three.js -->
+
+    <!-- UI Overlay -->
+    <div id="damage-overlay"></div>
+    <div id="ui-layer">
+        <div class="hud-top">
+            <div id="score-board">SCORE: <span id="score">0</span></div>
+        </div>
+        
+        <div id="crosshair"></div>
+        <div id="hitmarker"></div>
+
+        <div class="hud-bottom">
+            <div id="hp-bar-container">
+                <div id="hp-bar"></div>
+            </div>
+            <div id="weapon-selector">
+                <div class="weapon-slot active" id="slot-1"><span class="weapon-key">1</span>PISTOL</div>
+                <div class="weapon-slot" id="slot-2"><span class="weapon-key">2</span>LASER</div>
+                <div class="weapon-slot" id="slot-3"><span class="weapon-key">3</span>ROCKET</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start/Pause Screen -->
+    <div id="overlay">
+        <h1 id="title-text">POLYSPACE<br>WARFARE</h1>
+        <div id="mission-status" style="font-size: 24px; color: #ff3333; margin-bottom: 20px; display: none;">MISSION FAILED</div>
+        <button class="btn" id="start-btn">DEPLOY</button>
+        
+        <!-- SETTINGS UI -->
+        <div class="settings-box">
+            <div class="slider-container">
+                <label class="settings-label">滑鼠靈敏度: <span id="sens-val">1.0</span></label>
+                <input type="range" id="sensitivity" min="0.1" max="3.0" step="0.1" value="1.0">
+            </div>
+            
+            <div class="slider-container">
+                <label class="settings-label">移動速度: <span id="move-val">1.0</span></label>
+                <input type="range" id="move-speed" min="0.5" max="2.0" step="0.1" value="1.0">
+            </div>
+        </div>
+
+        <div class="controls-info">
+            <p><span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> 移動 | <span class="key">SPACE</span> 跳躍</p>
+            <p><span class="key">滑鼠</span> 瞄準 | <span class="key">左鍵</span> 射擊</p>
+            <p><span class="key">1</span><span class="key">2</span><span class="key">3</span> 切換武器 | <span class="key">ESC</span> 暫停</p>
+        </div>
+    </div>
+
+    <!-- Three.js Import -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js",
+                "three/examples/jsm/controls/PointerLockControls.js": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/controls/PointerLockControls.js"
+            }
+        }
+    </script>
+
+    <script type="module" src="game.js"></script>
+</body>
+</html>
