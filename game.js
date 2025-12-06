@@ -78,6 +78,24 @@ const damageOverlay = document.getElementById('damage-overlay');
 const missionStatus = document.getElementById('mission-status');
 const hitmarker = document.getElementById('hitmarker');
 
+// Audio Elements
+const bgmAudio = document.getElementById('bgm');
+const pistolSound = document.getElementById('pistol-sound');
+const laserSound = document.getElementById('laser-sound');
+const rocketSound = document.getElementById('rocket-sound');
+const hurtSound = document.getElementById('hurt-sound');
+const footstepSound = document.getElementById('footstep-sound');
+const jumpSound = document.getElementById('jump-sound');
+
+// Audio settings
+if (bgmAudio) bgmAudio.volume = 0.15;
+if (pistolSound) pistolSound.volume = 0.5;
+if (laserSound) laserSound.volume = 0.4;
+if (rocketSound) rocketSound.volume = 0.6;
+if (hurtSound) hurtSound.volume = 0.5;
+if (footstepSound) footstepSound.volume = 0.3;
+if (jumpSound) jumpSound.volume = 0.4;
+
 // Settings Elements
 const sensitivityInput = document.getElementById('sensitivity');
 const sensitivityVal = document.getElementById('sens-val');
@@ -151,6 +169,11 @@ function init() {
     controls.addEventListener('lock', () => {
         overlay.style.display = 'none';
         isGameActive = true;
+        
+        // Start background music
+        if (bgmAudio) {
+            bgmAudio.play().catch(e => console.log('BGM play failed:', e));
+        }
     });
     
     controls.addEventListener('unlock', () => {
@@ -158,6 +181,15 @@ function init() {
             overlay.style.display = 'flex';
             startBtn.innerText = "RESUME";
             document.getElementById('title-text').innerHTML = "PAUSED";
+            
+            // Pause background music and footsteps
+            if (bgmAudio) {
+                bgmAudio.pause();
+            }
+            if (footstepSound) {
+                footstepSound.pause();
+                footstepSound.currentTime = 0;
+            }
         }
         isGameActive = false;
     });
@@ -332,6 +364,25 @@ function shoot() {
     
     if (now - player.lastShot < wData.cooldown) return;
     player.lastShot = now;
+
+    // Play weapon-specific shoot sound
+    let currentWeaponSound = null;
+    switch(player.weapon) {
+        case 1: // Pistol
+            currentWeaponSound = pistolSound;
+            break;
+        case 2: // Laser
+            currentWeaponSound = laserSound;
+            break;
+        case 3: // Rocket
+            currentWeaponSound = rocketSound;
+            break;
+    }
+    
+    if (currentWeaponSound) {
+        currentWeaponSound.currentTime = 0;
+        currentWeaponSound.play().catch(e => console.log('Audio play failed:', e));
+    }
 
     // Recoil
     if (weaponMesh) {
@@ -547,6 +598,12 @@ function takeDamage(amount) {
     player.hp -= amount;
     if (player.hp < 0) player.hp = 0;
     
+    // Play hurt sound
+    if (hurtSound) {
+        hurtSound.currentTime = 0;
+        hurtSound.play().catch(e => console.log('Audio play failed:', e));
+    }
+    
     // UI Update
     hpBar.style.width = player.hp + "%";
     if(player.hp < 30) hpBar.style.background = "#f00";
@@ -579,6 +636,23 @@ function animate() {
         direction.z = Number(moveForward) - Number(moveBackward);
         direction.x = Number(moveRight) - Number(moveLeft);
         direction.normalize();
+
+        // Check if player is moving on ground
+        const isMoving = (moveForward || moveBackward || moveLeft || moveRight) && canJump;
+        
+        // Play/pause footstep sound based on movement
+        if (footstepSound) {
+            if (isMoving) {
+                if (footstepSound.paused) {
+                    footstepSound.play().catch(e => console.log('Footstep play failed:', e));
+                }
+            } else {
+                if (!footstepSound.paused) {
+                    footstepSound.pause();
+                    footstepSound.currentTime = 0;
+                }
+            }
+        }
 
         // --- MODIFIED: Apply Move Speed Multiplier ---
         if (moveForward || moveBackward) velocity.z -= direction.z * PLAYER_SPEED * moveSpeedMultiplier * delta * 50;
@@ -774,6 +848,12 @@ function onKeyDown(event) {
             if (canJump === true) {
                 velocity.y += JUMP_FORCE;
                 canJump = false;
+                
+                // Play jump sound
+                if (jumpSound) {
+                    jumpSound.currentTime = 0;
+                    jumpSound.play().catch(e => console.log('Jump sound play failed:', e));
+                }
             }
             break;
         case 'Digit1': player.weapon = 1; updateWeaponModel(); break;
@@ -811,6 +891,16 @@ function gameOver() {
     missionStatus.innerText = "MISSION FAILED - SCORE: " + player.score;
     startBtn.innerText = "RESTART MISSION";
     document.getElementById('title-text').innerHTML = "KIA";
+    
+    // Stop background music and footsteps
+    if (bgmAudio) {
+        bgmAudio.pause();
+        bgmAudio.currentTime = 0;
+    }
+    if (footstepSound) {
+        footstepSound.pause();
+        footstepSound.currentTime = 0;
+    }
 }
 
 function resetGame() {
